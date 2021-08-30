@@ -1,4 +1,4 @@
-#一、MySQL主从同步机制
+# 一、MySQL主从同步机制
 MySQL主从同步机制主要分为以下四个步骤：
 1.主库对所有DDL和DML产生的日志写进Binlog;
 2.主库生成一个Log dump线程，用来给从库I/O线程读取Binlog;
