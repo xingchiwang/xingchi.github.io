@@ -1,4 +1,4 @@
-一、MySQL主从同步机制
+Header 1 一、MySQL主从同步机制
 MySQL主从同步机制主要分为以下四个步骤：
 1.主库对所有DDL和DML产生的日志写进Binlog;
 2.主库生成一个Log dump线程，用来给从库I/O线程读取Binlog;
@@ -11,3 +11,20 @@ MySQL主从同步机制主要分为以下四个步骤：
 另一方面，由于SQL Thread也是单线程的，当主库的并发较高时，产生的DML数量超过了slave的SQL Thread所能处理的速度，或者当slave中有大型query语句产生了锁等待那么延时就产生了。
 
 产生主从延迟常见原因包括主库负载过高、网络延迟、机器性能太低、配置不合理等。
+
+
+Syntax highlighted code block
+
+# Header 1
+## Header 2
+### Header 3
+
+- Bulleted
+- List
+
+1. Numbered
+2. List
+
+**Bold** and _Italic_ and `Code` text
+
+[Link](url) and ![Image](src)
