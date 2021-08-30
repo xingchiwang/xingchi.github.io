@@ -4,7 +4,7 @@ MySQL主从同步机制主要分为以下四个步骤：
 2.主库生成一个Log dump线程，用来给从库I/O线程读取Binlog;
 3.从库的I/O Thread去请求主库的Binlog,并将得到的Binlog日志写到Relay log文件夹中；
 4.从库的SQL Thread会读取Relay log文件中的日志并解析成具体操作，将主库的DDL和DML操作事件在从库中重放
-[Image](![image](https://user-images.githubusercontent.com/44181286/131312995-f87db411-c067-4bdb-a4d9-646d8c0eedfa.png))
+(![image](https://user-images.githubusercontent.com/44181286/131312995-f87db411-c067-4bdb-a4d9-646d8c0eedfa.png))
 
 ## 二、主从同步延迟怎么产生的？
 在MySQL5.7之前，主从复制都是单线程的操作，主库对所有的DDL和DML产生的日志写进binlog，由于binlog是顺序写，所以效率很高。Slave的SQL Thread线程将主库的DDL和DML操作事件在slave中重放。DML和DDL的IO操作是随机的，不是顺序的，成本高很多。
