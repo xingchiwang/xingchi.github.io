@@ -39,3 +39,11 @@ datanode是文件系统的工作节点。它们根据需要存储并检索数据
 • distance(/dl/rl/nl, Zd2/r3/n4) = 6 (nodes in different data centers)
 
 
+## 文件写入过程
+![image](https://user-images.githubusercontent.com/44181286/142754706-bb29e025-e1a7-4da2-b988-3a458dbed752.png)
+如果任何datanode在数据写入期间发生故障。首先关闭管线，确认吧队列中的所有数据包都添加回数据队列的最前端，以确保故障节点下游的datanode不会漏掉任何一个数据包。为存储在另一正常datanode的当前数据块制定一个新的表示，并将改表示传给namenode，以便故障datanode在恢复后可以删除存储的部分数据块。
+
+## 复本怎么放
+namenode如何选择在那个datanode存储复本？这里需要对可靠性、写入带宽和读取带宽进行权衡。例如，吧所有复本都存储在一个节点损失的写入带宽最小，同一机架上服务器间的读取带宽是很高的。
+
+
