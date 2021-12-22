@@ -37,21 +37,25 @@ HDFS的辅助节点，它被用来创建检查点，定期合并edits_*和fsimag
 
 
 ## HDFS高可用
-导致HDFS无法提供正常服务的原因：NameNode升级和维护，软硬件维护和软件故障（硬件故障不是主要原因），错误操作。
-雅虎的数据表明:在雅虎运行的 15 个集群中，三年时间内，只有 3 次 NameNode 的故障与硬件问题有关。
-通过联合使用namenode和secondary namenode可以在一定程度上避免数据丢失，但是依然无法实现文件系统的高可用。
-如果没有高可用，那么想要从一个失效的namenode恢复，系统管理员得启动一个拥有文件系统元数据复本的namenode,并配置datanode和客户端以便使用这个新的namenode。新的namenode直到满足以下情形才能响应服务：1、将fsimage载入内存；2、重演编辑日志edits_；3、接收到足够多的来自datanode的数据块报告并推出安全模式。对于一个大型并拥有大量文件和数据块的集群，namenode冷启动需要30分钟甚至更久。
-现有比较成熟的HA解决方案有：
-1、元数据备份
-利用 Hadoop 自身的 Failover 措施(通过配置 dfs.name.dir)，NameNode 可以将元数据信息保存到多个目录。
-冷备，恢复时间与文件系统规模成正比。
-2、Secondary NameNode方案
-冷备，恢复时间与文件系统规模成正比，恢复的元数据并不是 HDFS 此刻的最新数据，存在一致性问题
-3、Checkpoint Node方案
-利用Hadoop的Checkpoint机制，自建Checkpoint节点进行备份，同SecondaryNameNode。
-4、Facebook的Avatarnode方案
-HDP2.0增加了对高可用的支持，它通过一对活动-备用namenode来实现，即Active NameNode 和 Standby NameNode互备。
-HDFS实际上是借助zookeeper实现高可用，见Hadoop NameNode 高可用 (High Availability) 实现解析
+导致HDFS无法提供正常服务的原因：NameNode升级和维护，软硬件维护和软件故障（硬件故障不是主要原因），错误操作。<br>
+雅虎的数据表明:在雅虎运行的 15 个集群中，三年时间内，只有 3 次 NameNode 的故障与硬件问题有关。<br>
+通过联合使用namenode和secondary namenode可以在一定程度上避免数据丢失，但是依然无法实现文件系统的高可用。<br>
+如果没有高可用，那么想要从一个失效的namenode恢复，系统管理员得启动一个拥有文件系统元数据复本的namenode,并配置datanode和客户端以便使用这个新的namenode。新的namenode直到满足以下情形才能响应服务：<br>
+1、将fsimage载入内存；<br>
+2、重演编辑日志edits_；<br>
+3、接收到足够多的来自datanode的数据块报告并推出安全模式。对于一个大型并拥有大量文件和数据块的集群，namenode冷启动需要30分钟甚至更久。<br>
+<br>
+现有比较成熟的HA解决方案有：<br>
+1、元数据备份<br>
+利用 Hadoop 自身的 Failover 措施(通过配置 dfs.name.dir)，NameNode 可以将元数据信息保存到多个目录。<br>
+冷备，恢复时间与文件系统规模成正比。<br>
+2、Secondary NameNode方案<br>
+冷备，恢复时间与文件系统规模成正比，恢复的元数据并不是 HDFS 此刻的最新数据，存在一致性问题<br>
+3、Checkpoint Node方案<br>
+利用Hadoop的Checkpoint机制，自建Checkpoint节点进行备份，同SecondaryNameNode。<br>
+4、Facebook的Avatarnode方案<br>
+HDP2.0增加了对高可用的支持，它通过一对活动-备用namenode来实现，即Active NameNode 和 Standby NameNode互备。<br>
+HDFS实际上是借助zookeeper实现高可用<br>
 
 
 
