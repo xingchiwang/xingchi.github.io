@@ -98,11 +98,11 @@ namenode如何选择在那个datanode存储复本？这里需要对可靠性、�
 
 写详细步骤：
 
-1、根namenode通信请求上传文件，namenode检查目标文件是否已存在，父目录是否存在
+1、跟namenode通信请求上传文件，namenode检查目标文件是否已存在，父目录是否存在
 
 2、namenode返回是否可以上传
 
-3、client会先对文件进行切分，比如一个blok块128m，文件有300m就会被切分成3个块，一个128M、一个128M、一个44M请求第一个 block该传输到哪些datanode服务器上
+3、client会先对文件进行切分，比如一个block块128m，文件有300m就会被切分成3个块，一个128M、一个128M、一个44M请求第一个 block该传输到哪些datanode服务器上
 
 4、namenode返回datanode的服务器
 
