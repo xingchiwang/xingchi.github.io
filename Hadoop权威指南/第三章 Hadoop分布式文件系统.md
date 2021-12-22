@@ -63,6 +63,9 @@ HDFS实际上是借助zookeeper实现高可用<br>
 1.备份那些组成文件系统元数据持久状态的文件。
 2.另一种可行的方法是运行一个辅助namenode，但它不能被用作namenode。
 
+## 复本怎么放
+namenode如何选择在那个datanode存储复本？这里需要对可靠性、写入带宽和读取带宽进行权衡。例如，吧所有复本都存储在一个节点损失的写入带宽最小，同一机架上服务器间的读取带宽是很高的。
+
 ## 网络拓扑与Hadoop
 在海量数据处理中，其主要限制因素是节点之间数据的传输速率-带宽很稀缺。
 ![image](https://user-images.githubusercontent.com/44181286/142754568-0f8abf3b-adca-4140-9ae3-26b4eb240b04.png)
@@ -75,12 +78,42 @@ HDFS实际上是借助zookeeper实现高可用<br>
 
 • distance(/dl/rl/nl, Zd2/r3/n4) = 6 (nodes in different data centers)
 
+## 文件读过程
+客户端将要读取的文件路径发送给namenode，namenode获取文件的元信息（主要是block的存放位置信息）返回给客户端，客户端根据返回的信息找到相应datanode逐个获取文件的block并在客户端本地进行数据追加合并从而获得整个文件
 
-## 文件写入过程
-![image](https://user-images.githubusercontent.com/44181286/142754706-bb29e025-e1a7-4da2-b988-3a458dbed752.png)
+![image](https://user-images.githubusercontent.com/44181286/147022115-e2f083e3-2166-489c-bdac-d378dc49a621.png)
+
+读详细步骤：
+
+1、跟namenode通信查询元数据（block所在的datanode节点），找到文件块所在的datanode服务器
+
+2、挑选一台datanode（就近原则，然后随机）服务器，请求建立socket流
+
+3、datanode开始发送数据（从磁盘里面读取数据放入流，以packet为单位来做校验）
+
+4、客户端以packet为单位接收，先在本地缓存，然后写入目标文件，后面的block块就相当于是append到前面的block块最后合成最终需要的文件。
+
+## 文件写过程
+![image](https://user-images.githubusercontent.com/44181286/147022411-819a3c36-5322-4dac-a2a7-aca62a797669.png)
+
+写详细步骤：
+
+1、根namenode通信请求上传文件，namenode检查目标文件是否已存在，父目录是否存在
+
+2、namenode返回是否可以上传
+
+3、client会先对文件进行切分，比如一个blok块128m，文件有300m就会被切分成3个块，一个128M、一个128M、一个44M请求第一个 block该传输到哪些datanode服务器上
+
+4、namenode返回datanode的服务器
+
+5、client请求一台datanode上传数据（本质上是一个RPC调用，建立pipeline），第一个datanode收到请求会继续调用第二个datanode，然后第二个调用第三个datanode，将整个pipeline建立完成，逐级返回客户端
+
+6、client开始往A上传第一个block（先从磁盘读取数据放到一个本地内存缓存），以packet为单位（一个packet为64kb），当然在写入的时候datanode会进行数据校验，它并不是通过一个packet进行一次校验而是以chunk为单位进行校验（512byte），第一台datanode收到一个packet就会传给第二台，第二台传给第三台；第一台每传一个packet会放入一个应答队列等待应答
+
+7、当一个block传输完成之后，client再次请求namenode上传第二个block的服务器。
+
+
 如果任何datanode在数据写入期间发生故障。首先关闭管线，确认吧队列中的所有数据包都添加回数据队列的最前端，以确保故障节点下游的datanode不会漏掉任何一个数据包。为存储在另一正常datanode的当前数据块制定一个新的表示，并将改表示传给namenode，以便故障datanode在恢复后可以删除存储的部分数据块。
 
-## 复本怎么放
-namenode如何选择在那个datanode存储复本？这里需要对可靠性、写入带宽和读取带宽进行权衡。例如，吧所有复本都存储在一个节点损失的写入带宽最小，同一机架上服务器间的读取带宽是很高的。
 
 
